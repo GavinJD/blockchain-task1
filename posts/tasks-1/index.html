@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Task 1 - Favorite Fruit - Blockchain Tasks</title><meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<meta property="og:description" content="A blockchain based fruit voting system, by K Venkatesh, Gavin D&#39;Souza and Karan K Geo." />
+	<meta name="twitter:description" content="A blockchain based fruit voting system, by K Venkatesh, Gavin D&#39;Souza and Karan K Geo." />
+	<meta name="description" content="A blockchain based fruit voting system, by K Venkatesh, Gavin D&#39;Souza and Karan K Geo." />
+	<meta name="description" content="A blockchain based fruit voting system, by K Venkatesh, Gavin D&#39;Souza and Karan K Geo." />
+
+	<meta property="og:title" content="Task 1 - Favorite Fruit | Blockchain Tasks" />
+	<meta name="twitter:title" content="Task 1 - Favorite Fruit | Blockchain Tasks" />
+
+	<meta property="og:image" content=""/>
+	<meta itemprop="name" content="Task 1 - Favorite Fruit | Blockchain Tasks" />
+	<meta name="application-name" content="Task 1 - Favorite Fruit | Blockchain Tasks" />
+	<meta property="og:site_name" content="" />
+	<meta property="og:title" content="Task 1 - Favorite Fruit" />
+<meta property="og:description" content="A blockchain based fruit voting system, by K Venkatesh, Gavin D&#39;Souza and Karan K Geo." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://GavinJD.github.io/blockchain-task1/posts/tasks-1/" />
+<meta property="article:published_time" content="2020-10-15T19:30:49+05:30" />
+<meta property="article:modified_time" content="2020-10-15T19:30:49+05:30" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Task 1 - Favorite Fruit"/>
+<meta name="twitter:description" content="A blockchain based fruit voting system, by K Venkatesh, Gavin D&#39;Souza and Karan K Geo."/>
+
+	<link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" media="screen" href="https://GavinJD.github.io/blockchain-task1/css/main.css" /><link rel="stylesheet" type="text/css" href="https://GavinJD.github.io/blockchain-task1/css/dark.css"  />
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://GavinJD.github.io/blockchain-task1/">Blockchain Tasks</a>
+	</div>
+	<nav>
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">Task 1 - Favorite Fruit</h1>
+			<div class="meta">Posted on Oct 15, 2020</div>
+		</div>
+		
+
+		<section class="body">
+			<p>This simple contract was written to show a proof of concept of a voting system. The smart contract is written in the Solidity language, compiled using the online <a href="https://remix.ethereum.org/">Remix compiler</a>.</p>
+<p>Below is the code for the smart contract.</p>
+<pre><code>pragma solidity ^0.4.17;
+
+contract Ballot {
+
+    struct Voter {
+        uint weight;
+        bool voted;
+        uint8 vote;
+    }
+
+    //modifer
+    modifier onlyOwner () {
+    require(msg.sender == chairperson);
+    _;
+    }
+
+    address public chairperson;
+    mapping(address =&gt; Voter) public voters;
+    uint[4] public proposals;
+
+    // Create a new ballot with 4 different proposals.
+    function Ballot() public {
+        chairperson = msg.sender;
+        voters[chairperson].weight = 2;
+    }
+
+    /// Give $(toVoter) the right to vote on this ballot.
+    /// May only be called by $(chairperson).
+    function register(address toVoter) public onlyOwner{
+        if(voters[toVoter].weight != 0) revert();
+        voters[toVoter].weight = 1;
+        voters[toVoter].voted = false;
+    }
+
+    /// Give a single vote to proposal $(toProposal).
+    function vote(uint8 toProposal) public {
+        Voter storage sender = voters[msg.sender];
+        if (sender.voted || toProposal &gt;= 4 || sender.weight == 0) revert();
+        sender.voted = true;
+        sender.vote = toProposal;
+        proposals[toProposal] += sender.weight;
+    }
+
+    function winningProposal() public constant returns (uint8 _winningProposal) {
+        uint256 winningVoteCount = 0;
+        for (uint8 prop = 0; prop &lt; 4; prop++)
+            if (proposals[prop] &gt; winningVoteCount) {
+                winningVoteCount = proposals[prop];
+                _winningProposal = prop;
+            }
+    }
+
+    function getCount() public constant returns (uint[4]) {
+        return proposals;
+    }
+}
+</code></pre>
+<h2 id="deploying-the-contract-chairperson">Deploying the contract, chairperson</h2>
+<p>In this contract, we can have at most two chairpersons. By default, the owner of the contract is the chairperson. A chairperson can register new users to make them eligible to vote, and can vote as well. On top of this, each registered voter has a weight, which is set to 1 by default. The chairperson alone has a weight of 2, and his/her vote thus counts for twice the vote of a normal user.</p>
+<p><img src="https://i.imgur.com/knvdVOL.jpg" alt="Creation of chairperson and startup of contract">
+<em>Deploying the contract and assigning a chairperson</em></p>
+<h2 id="fruit-selection">Fruit selection</h2>
+<p>We can choose the number of fruits we want in in the selection. Here, we choose 3 fruits. While we haven&rsquo;t given names to the three, they can be accessed by their array index i.e 0, 1 and 2.</p>
+<p><img src="https://i.imgur.com/1KA5KX2.jpg" alt="Inputing the number of Fruits">
+<em>Selecting the noOfFruits variable as 3</em></p>
+<h2 id="registering-people-and-voting">Registering people and voting</h2>
+<p>For the purposes of a demo, we create multiple users and register them to vote. Once this is done we can have them place votes and see how the blockchain handles them.</p>
+<p><img src="https://i.imgur.com/1KA5KX2.jpg" alt="Registering users for voting - 1">
+<em>Registering a user and having it vote for Fruit 1</em>
+<img src="https://i.imgur.com/ppmOamv.jpeg" alt="Registering users for voting - 2">
+<em>Registering a user and having it vot for Fruit 2</em></p>
+<h2 id="getting-the-result">Getting the result</h2>
+<p>After all votes are done, we just have to call the winningProposal method to obtain the Fruit with the most votes. Here the Fruit with the most votes is Fruit 1.</p>
+<p><img src="https://i.imgur.com/B1fgmbw.jpeg" alt="The winning Fruit"></p>
+<p><em>As we can see below the winningFruit button, 1 is the winner</em></p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			
+		</div>
+	</article>
+</main>
+<footer>
+<hr>⚡️
+	2020  <a href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+</footer>
+
+
+</div>
+    </body>
+</html>
