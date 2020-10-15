@@ -14,7 +14,7 @@
       
       <guid>https://gavinjd.github.io/blockchain-task1/posts/tasks-1/</guid>
       <description>By K Venkatesh, Gavin D&amp;rsquo;Souza and Karan K Geo
-This simple contract was written to show a proof of concept of a voting system. The smart contract is written in the Solidity language, compiled using the online Remix compiler.
+This contract was written to show demonstrate a proof of concept of a consensus reaching system. The smart contract is written in the Solidity language, compiled using the online Remix compiler.
 Below is the code for the smart contract.
 pragma solidity ^0.4.17; contract Ballot { struct Voter { uint weight; bool voted; uint8 vote; } //modifer modifier onlyOwner () { require(msg.sender == chairperson); _; } address public chairperson; mapping(address =&amp;gt; Voter) public voters; uint[4] public proposals; // Create a new ballot with 4 different proposals.</description>
     </item>
